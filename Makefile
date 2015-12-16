@@ -13,8 +13,9 @@ extension/data/p1.js extension/data/p1.min.js: $(p1_src)
 	cp nlearn/p1.min.js extension/data/p1.min.js
 
 
-extension/data/rewriter.web.js extension/data/matcher.web.js: extension/rewriter.js extension/matcher.js
-	cd extension; $(node_es6) ../webify.js rewriter.js > data/rewriter.web.js; $(node_es6) ../webify.js matcher.js > data/matcher.web.js
+extension/data/rewriter.web.js extension/data/matcher.web.js extension/data/utils.web.js extension/data/setup.web.js: extension/rewriter.js extension/matcher.js extension/data/setup.js extension/data/utils.js
+	cd extension; \
+	$(node_es6) ../webify.js rewriter rewriter.js > data/rewriter.web.js; $(node_es6) ../webify.js matcher.js > data/matcher.web.js
 
 extension/data/dxf.min.js: extension/data/rewriter.web.js extension/data/matcher.web.js extension/data/setup.js extension/data/utils.js
 	cat $^ | babel | uglifyjs > dxf.min.js

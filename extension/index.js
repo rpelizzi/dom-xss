@@ -55,7 +55,7 @@ var mkOptionItem = function(obj, key, isFirst) {
 Object.keys(config).forEach((k, i) => mkOptionItem(config, k, i === 0));
 
 
-var mkExternal = (url, id, attrs="") => `<script src="${url}" id="${id}" ${attrs}></script>\n`;
+var mkExternal = (url, id, attrs="") => `<script src="${url+'?proxypass=true'}" id="${id}" ${attrs}></script>\n`;
 var mkInline = (src, id attrs="") => `<script id="${id}" ${attrs}>\n${src}\n</script>\n`;
 
 proxy.rewrite({
@@ -66,12 +66,12 @@ proxy.rewrite({
     if (config.rewrite) {
       data = rewriter.html.rewriteScripts(data, s => this.js(s, req));
       var runtime = "";
-      runtime += mkExternal("http://localhost:8090/p1.min.js?proxypass=true", "p1Url");
+      runtime += mkExternal("http://localhost:8090/p1.min.js", "p1Url");
       if (config.inline) {
         runtime += mkInline(extData.load("dxf.min.js"), "dxfSrc");
       } else {
-        ["utils.js", "setup.js", "matcher.web.js", "rewriter.web.js"].forEach(function(f,i){
-          runtime += mkExternal("http://localhost:8090/" + f + "?proxypass=true", dxfUrl + i);
+        ["utils.web.js", "setup.web.js", "matcher.web.js", "rewriter.web.js"].forEach(function(f,i) {
+          runtime += mkExternal("http://localhost:8090/" + f, dxfUrl + i);
         });
       }
       data = rewriter.html.addFirst(data, runtime);
@@ -99,7 +99,6 @@ proxy.rewrite({
     return data;
   },
   other: function(data, req) {
-    // console.log("OTHER", req.originalURI.scheme, req.contentType, data.length);
     return data;
   }
 });
