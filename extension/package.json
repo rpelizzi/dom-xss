@@ -1,0 +1,21 @@
+{
+  "title": "Rewriting Extension",
+  "name": "xssrewrite",
+  "version": "0.0.1",
+  "description": "Rewrites incoming javascript to mediate usage of sensitive sources and sinks in the context of DOM-Based XSS Attacks",
+  "main": "index.js",
+  "author": "Riccardo Pelizzi",
+  "engines": {
+    "firefox": ">=38.0a1"
+  },
+  "license": "GPL3",
+  "keywords": [
+    "jetpack"
+  ],
+  "dependencies": {
+    "menuitem": "0.0.5",
+    "js-beautify": "1.5.10",
+    "html-entities": "1.2.0",
+    "addon-proxy": "0.0.4"
+  }
+}
