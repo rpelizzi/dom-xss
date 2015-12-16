@@ -26,7 +26,7 @@ var Matcher = function(src, shouldFilter = true) {
   this.src = src;
 
   var match, indexes = [];
-  while (match = lit_regex.exec(src)) {
+  while (match = lit_regex.exec(src)) { /* jshint ignore:line */
     if (shouldFilter) {
       if (match[0].length < 6)
         continue;

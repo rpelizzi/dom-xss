@@ -11,8 +11,13 @@
     "location": true,
     "HTMLDocument": true
   },
+  "exported": {
+    "__pthis": true,
+    "__peval": true
+  },
   "eqeqeq": true,
   "esnext": true,
+  "nonstandard": true,
   "undef": true,
   "unused": true,
   "evil": true,

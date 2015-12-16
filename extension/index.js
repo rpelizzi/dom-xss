@@ -1,15 +1,12 @@
 /* globals require: false */
 var proxy = require("addon-proxy");
-var {Cu, Cc, Ci} = require("chrome");
-var events = require("sdk/system/events");
+var {Cc, Ci} = require("chrome");
 var rewriter = require("./rewriter");
 var {Menuitem} = require("menuitem");
 var {js_beautify, html_beautify} = require("js-beautify");
-var {Matcher} = require("./matcher");
 var entities = require("html-entities").AllHtmlEntities;
 var addGlobals = require("add-globals");
 
-var file = require("sdk/io/file");
 var extData = require("sdk/self").data;
 var {setMyPrefs} = require("./prefs");
 
@@ -32,8 +29,8 @@ addGlobals(function(w, cloner) {
   w.dxfExt.getFile = f => extData.load(f);
   w.dxfExt.js_beautify = js_beautify;
   w.dxfExt.html_beautify = html_beautify;
-  // w.dxfExt.decodeEntities = src => entities.decode(src);
-  // w.dxfExt.getBaseDomainFromHost = h => eTLDService.getBaseDomainFromHost(h);
+  w.dxfExt.decodeEntities = src => entities.decode(src);
+  w.dxfExt.getBaseDomainFromHost = h => eTLDService.getBaseDomainFromHost(h);
 });
 
 // just fill them automatically
@@ -96,9 +93,6 @@ proxy.rewrite({
       data = rewriter.js.patchEval(data);
       data = rewriter.js.addIframeCheck(data);
     }
-    return data;
-  },
-  other: function(data, req) {
     return data;
   }
 });

@@ -215,7 +215,8 @@ dxf.wrapGetter(Node.prototype, "ownerDocument", function(orig) {
 });
 
 dxf.wrapGetter(Document.prototype, "defaultView", function(orig) {
-  return dxf.wrap(window);
+  var w = orig();
+  return dxf.wrap(w);
 });
 
 // parentElement can't get to the document
