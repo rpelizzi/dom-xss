@@ -3,7 +3,7 @@ ext_src = extension/*.js
 p1_src  = nlearn/Makefile nlearn/*.cpp nlearn/*.h
 all_src = $(web_src) $(ext_src) $(p1_src)
 
-node_es6 = node --es_stating --harmony_destructuring
+node_es6 = node --es_staging --harmony_destructuring
 
 all: $(all_src)
 
