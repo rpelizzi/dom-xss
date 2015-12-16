@@ -1,7 +1,7 @@
 ext_files = extension/data/p1.js extension/data/p1.min.js extension/data/setup.web.js extension/data/utils.web.js \
  extension/data/matcher.web.js extension/data/rewriter.web.js \
  extension/data/dxf.min.js
-p1_src = nlearn/Makefile nlearn/*.cpp nlearn/*.h
+p1_src = nlearn/Makefile nlearn/*.cpp nlearn/*.h nlearn/p1utils.js nlearn/Makefile
 ext_src = extension/*.js extension/data/utils.js extension/data/setup.js
 src = $(p1_src) $(ext_src)
 

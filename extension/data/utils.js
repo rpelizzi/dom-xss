@@ -227,10 +227,18 @@ exports.putRuntime = function(w) {
     console.log("__window already exists");
     return;
   }
-  var dxfSrc = dxfExt.getFile(dxfExt.config.minify ? "dxf.min.js" : "dxf.js");
   // recycle existing emscripten module
   w.p1FastMatch = p1FastMatch;
-  w.eval(dxfSrc + mkSrcMap("dxf.js"));
+  if (dxfExt.config.inline) {
+    var dxf = dxfExt.getFile("dxf.min.js");
+    w.eval(dxf + mkSrcMap("dxf.min.js"));
+  } else {
+    ["matcher.web.js", "rewriter.web.js", "utils.web.js", "setup.web.js"].forEach(function(f,i) {
+      var file = dxfExt.getFile(f);
+      w.eval(file + mkSrcMap(f));
+    });    
+  }
+  console.log("Inserted runtime", w.location);
 };
 
 

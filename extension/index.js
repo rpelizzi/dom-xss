@@ -74,7 +74,7 @@ proxy.rewrite({
       data = rewriter.html.addFirst(data, runtime);
     }
     // TODO: hangs on vnexpress.net, already filed bug
-    if (config.beautify && data.length < 5000)
+    if (config.beautify)
       data = html_beautify(data);
     return data;
   },

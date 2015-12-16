@@ -24,7 +24,7 @@
       return [];
     if (p.length <= s.length)
       return _p1FastMatch(p, s).filter(function(m) {
-        m[1]-m[0] > MIN_LENGTH; // +1?
+        return m[1]-m[0] > MIN_LENGTH; // +1?
       });
     var matches = _p1FastMatch(s, p);
     if (matches.length > 0)

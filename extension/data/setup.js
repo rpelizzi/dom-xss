@@ -27,7 +27,7 @@ HTMLDocument.prototype.write = function _write(html) {
   if (dxfExt.config.beautify)
     html = html_beautify(html);
   var ret = __olddocwrite.apply(dxf.unwrap(this), [html]);
-  dxf.putRuntime(window);
+  dxf.putRuntime(dxf.unwrap(this).defaultView);
   return ret;
 };
 HTMLDocument.prototype.writeln = function _writeln(html) {
@@ -38,7 +38,7 @@ HTMLDocument.prototype.open = function _open() {
   console.log("dopen", arguments);
   // TODO: not sure if i need it, i could check directly in document.write
   var ret = __olddocopen.apply(dxf.unwrap(this), arguments);
-  dxf.putRuntime(window);
+  dxf.putRuntime(dxf.unwrap(this).defaultView);
   return ret;
 };
 

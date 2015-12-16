@@ -6,7 +6,7 @@ Compared to browserify, there is no support for static resolution and ordering:
 every module must be imported with a script tag after all of its dependencies,
 and require errors will happen at runtime.
 
-The stubs are read from webify.json (hardcoded for now).
+The stubs are read from webify.json (filename is hardcoded for now).
 
 The name of the module is just the filename stripped of the extension.
 Require will ignore paths, so it will fail if two modules have the same
