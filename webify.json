@@ -1,3 +1,6 @@
 {
-  "fs": "{a:1}"
+  "fs": "{a:1}",
+  "html-entities": "{AllHtmlEntities: {decode: dxfExt.decodeEntities}}",
+  "tldjs": "{getDomain: dxfExt.getBaseDomainFromHost}",
+  "js-beautify": "{js_beautify: dxfExt.js_beautify, html_beautify: dxfExt.html_beautify}"
 }

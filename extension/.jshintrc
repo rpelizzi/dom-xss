@@ -1,0 +1,8 @@
+{
+  "eqeqeq": true,
+  "esnext": true,
+  "undef": true,
+  "unused": true,
+  "evil": true,
+  "node": true
+}

@@ -9,14 +9,6 @@ This module does two things:
    offset.
 */
 
-// let it run on the browser
-try {
-  window.exports = window;
-} catch (e) {
-
-}
-
-//TODO: this can become an independent node module
 
 // multi-line comments
 // inline comments

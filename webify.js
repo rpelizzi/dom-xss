@@ -29,18 +29,17 @@ var prelude = `
 if (!window.__require) {
   window.__requireCache = {};
   window.__require = function(n) {
-    return __requireCache[n.split("/").reverse()[0]] || (() => { throw new Error("Module " + n + " not found")})();
-  }
+    return __requireCache[n.split("/").reverse()[0]] || (() => { throw new Error("Module " + n + " not found");})();
+  };
 }`;
 
 var rem = false; // remove first blank line
 src = src.replace(/require\(\"(.*?)\"\)/g, (match, name) => stubs[name] || match);
 src = src.split("\n").filter(l => rem || l !== "" || !(rem = true)).map(l => "  " + l).join("\n");
-src = `
-var ${name}=(function(require){var module={exports:{}},exports=module.exports,global=window;
+src = `window.__requireCache["${name}"]=(function(require){var module={exports:{}},exports=module.exports,global=window;
 ${src}
   return module.exports;
 })(__require);
 `;
 
-stdout.write(prelude+src);
+stdout.write(prelude.replace(/\n/g, "")+src);

@@ -2,7 +2,7 @@
 var proxy = require("addon-proxy");
 var {Cu, Cc, Ci} = require("chrome");
 var events = require("sdk/system/events");
-var {rewriteJs, rewriteInlineJs, htmlAdd, removeSrcMap, dbgIframeFix, dbgEvalSearch} = require("./rewriter");
+var rewriter = require("./rewriter");
 var {Menuitem} = require("menuitem");
 var {js_beautify, html_beautify} = require("js-beautify");
 var {Matcher} = require("./matcher");
@@ -32,8 +32,8 @@ addGlobals(function(w, cloner) {
   w.dxfExt.getFile = f => extData.load(f);
   w.dxfExt.js_beautify = js_beautify;
   w.dxfExt.html_beautify = html_beautify;
-  w.dxfExt.decodeEntities = src => entities.decode(src);
-  w.dxfExt.getBaseDomainFromHost = h => eTLDService.getBaseDomainFromHost(h);
+  // w.dxfExt.decodeEntities = src => entities.decode(src);
+  // w.dxfExt.getBaseDomainFromHost = h => eTLDService.getBaseDomainFromHost(h);
 });
 
 // just fill them automatically
@@ -56,7 +56,7 @@ Object.keys(config).forEach((k, i) => mkOptionItem(config, k, i === 0));
 
 
 var mkExternal = (url, id, attrs="") => `<script src="${url+'?proxypass=true'}" id="${id}" ${attrs}></script>\n`;
-var mkInline = (src, id attrs="") => `<script id="${id}" ${attrs}>\n${src}\n</script>\n`;
+var mkInline = (src, id, attrs="") => `<script id="${id}" ${attrs}>\n${src}\n</script>\n`;
 
 proxy.rewrite({
   html: function(data, req) {
@@ -70,8 +70,8 @@ proxy.rewrite({
       if (config.inline) {
         runtime += mkInline(extData.load("dxf.min.js"), "dxfSrc");
       } else {
-        ["utils.web.js", "setup.web.js", "matcher.web.js", "rewriter.web.js"].forEach(function(f,i) {
-          runtime += mkExternal("http://localhost:8090/" + f, dxfUrl + i);
+        ["matcher.web.js", "rewriter.web.js", "utils.web.js", "setup.web.js"].forEach(function(f,i) {
+          runtime += mkExternal("http://localhost:8090/" + f, "dxfUrl" + i);
         });
       }
       data = rewriter.html.addFirst(data, runtime);

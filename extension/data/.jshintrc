@@ -1,0 +1,22 @@
+{
+  "browserify": true,
+  "browser": true,
+  "globals": {
+    "p1FastMatch": true,
+    "dxfExt": true,
+    "Function": true,
+    "setTimeout": true,
+    "setInterval": true,
+    "Worker": true,
+    "location": true,
+    "HTMLDocument": true
+  },
+  "eqeqeq": true,
+  "esnext": true,
+  "undef": true,
+  "unused": true,
+  "evil": true,
+  "node": true,
+  "proto": true,
+  "scripturl": true
+}
