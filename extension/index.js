@@ -30,7 +30,10 @@ addGlobals(function(w, cloner) {
   w.dxfExt.js_beautify = js_beautify;
   w.dxfExt.html_beautify = html_beautify;
   w.dxfExt.decodeEntities = src => entities.decode(src);
-  w.dxfExt.getBaseDomainFromHost = h => eTLDService.getBaseDomainFromHost(h);
+  w.dxfExt.getBaseDomainFromHost = function(h) {
+    if (h === "localhost" || /^\d+\.\d+\.\d+\.\d+$/.test(h) || h === "") return h;
+    return eTLDService.getBaseDomainFromHost(h);
+  };
 });
 
 // just fill them automatically
