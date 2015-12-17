@@ -126,15 +126,15 @@ exports.html.rewriteScripts = function(src, jsf) {
     
     rest = rest.replace(attr_regex, function(match, name) {
       name = name.toLowerCase();
-      var value = arguments[2] ? arguments[2] :
-        arguments[3] ? arguments[3] :
-        arguments[4] ? arguments[4] : null;
+      // 2,3,4 have different delimiters, we want to re-encode it the same way
+      var value = arguments[2] || arguments[3] || arguments[4] || null;
+      var sep = (arguments[2] && "\"") || (arguments[3] && "'") || (arguments[4] && "");
       if (name.startsWith("on") && value) {
         value = entities.decode(value);
         value = value.replace(/^javascript:/, ""); // useless, messes with our rewriting
         value = jsf(value);
         value = entities.encode(value);
-        return name + "=\"" + value.replace(/\n/g, " ") + "\"";
+        return name + "=" + sep + value.replace(/\n/g, " ") + sep;
       }
       return match;
     });

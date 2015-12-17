@@ -38,6 +38,7 @@ post: $(ext_files)
 # broken if you modify nlearn
 watch: $(ext_files)
 	node localserver.js & \
+	make post; \
 	while true; do \
 		inotifywait -e modify $(src) webify.json && \
 		make post; \

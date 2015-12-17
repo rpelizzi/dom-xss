@@ -20,7 +20,7 @@ HTMLDocument.prototype.write = function _write(html) {
       s = js_beautify(s);
     if (dxfExt.config.debug) {
       s = rewriter.js.patchEval(s);
-      s = rewriter.js.addIframeCheck(s);
+      //s = rewriter.js.addIframeCheck(s);
     }
     return s;
   });

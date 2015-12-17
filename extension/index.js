@@ -91,7 +91,7 @@ proxy.rewrite({
     }
     if (config.rewrite && config.debug) {
       data = rewriter.js.patchEval(data);
-      data = rewriter.js.addIframeCheck(data);
+      //data = rewriter.js.addIframeCheck(data);
     }
     return data;
   }
