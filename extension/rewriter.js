@@ -113,9 +113,9 @@ exports.html.addFirst = function(html, src) {
 var script_regex = /<script((?:\s+[\w-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*>([^]*?)<\/script[^>]*>/igm;
 // this abomination is just the basic tag regex with the attribute part repeated 3 times,
 // where the middle one is a mandatory on* attribute with a mandatory value.
-var evel_regex = /<([-A-Za-z0-9_\:]+)((?:\s+[\w-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*(?:\s+on\w+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+)))+(?:\s+[\w-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/igm;
+var evel_regex = /<([-a-z0-9_\:]+)((?:\s+[\w-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*(?:\s+on\w+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+)))+(?:\s+[\w-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/igm;
 // and then we replace the correct attribute, using HTMLParser's regex
-var attr_regex = /([-A-Za-z0-9_]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/g;
+var attr_regex = /(on[a-z]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/ig;
 
 exports.html.rewriteScripts = function(src, jsf) {
   src = src.replace(script_regex, function(script, rest, code) {
@@ -125,18 +125,16 @@ exports.html.rewriteScripts = function(src, jsf) {
   src = src.replace(evel_regex, function(script, tagName, rest, unary) {
     
     rest = rest.replace(attr_regex, function(match, name) {
-      name = name.toLowerCase();
       // 2,3,4 have different delimiters, we want to re-encode it the same way
       var value = arguments[2] || arguments[3] || arguments[4] || null;
-      var sep = (arguments[2] && "\"") || (arguments[3] && "'") || (arguments[4] && "");
-      if (name.startsWith("on") && value) {
-        value = entities.decode(value);
-        value = value.replace(/^javascript:/, ""); // useless, messes with our rewriting
-        value = jsf(value);
-        value = entities.encode(value);
-        return name + "=" + sep + value.replace(/\n/g, " ") + sep;
-      }
-      return match;
+      if (!value)
+        return match;
+      var sep = (arguments[2] && "\"") || (arguments[3] && "'") || "";
+      value = entities.decode(value);
+      value = value.replace(/^javascript:/, ""); // useless, messes with our rewriting
+      value = jsf(value);
+      value = entities.encode(value);
+      return name + "=" + sep + value.replace(/\n/g, " ") + sep;
     });
 
     return "<" + tagName + rest + (unary ? "/" : "") + ">";

@@ -6,7 +6,7 @@ var {js_beautify, html_beautify} = require("js-beautify");
 var rewriter = require("../rewriter");
 var dxf = require("./utils");
 
-window.dxf = dxf; // allow parent to use utils
+window.dxf = dxf; // allow other scripts to use utils
 
 // document.write, document.writeln, document.open
 // TODO: use document.readyState to see if you need to add the hack to the new HTML code

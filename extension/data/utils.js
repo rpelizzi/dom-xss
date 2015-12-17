@@ -256,7 +256,7 @@ var filter_regex = /^[\w-\?#$]+$/;
 var param_regex = /[(\?|\&)]([^=]+)\=([^&#]+)/g;
 
 // TODO: cache some of this work...
-var getSources = function() {
+var getSources = exports.getSources = function() {
   var allSources = {
     "document.URL": document.URL,
     "location.hash": location.hash.substr(1),
@@ -272,7 +272,7 @@ var getSources = function() {
     (k === "document.URL" || sources[k] === true)
   );
   if (sources["parent"]) {
-    var parentSources = parent.getSources().oMap((k,v) => ["parent__" + k, v]);
+    var parentSources = parent.dxf.getSources().oMap((k,v) => ["parent__" + k, v]);
     Object.assign(allSources, parentSources);
   }
   return allSources.oMap((k,v) => [k, unescapeLoop(v)]);
@@ -284,10 +284,10 @@ var matchSources = function(s, f) {
   });
 };
 
-// these are copied from rewriter.js
-var script_regex = /(<script((?:\s+[\w-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*>)([^]*?)<\/script[^>]*>/im;
-var evel_regex = /<([-A-Za-z0-9_\:]+)((?:\s+[\w-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*(?:\s+on\w+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+)))+(?:\s+[\w-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/igm;
-var attr_regex = /([-A-Za-z0-9_]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/g;
+// these are similar to those in rewriter.js, but they have been modified
+var script_regex = /(<script((?:\s+[\w-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*>)([^]*?)<\/script[^>]*>/igm;
+var evel_regex = /(<[-a-z0-9_\:]+)((?:\s+[\w-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*(?:\s+on\w+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+)))+(?:\s+[\w-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/igm;
+var attr_regex = /(on[a-z]+)(?:(\s*=\s*)(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/ig;
 
 
 /*
@@ -307,19 +307,33 @@ Examples:
 - location.hash = "3pz"
 */
 
-// TODO: use DOMParser to verify that you are not being blindsided by scripts.
-// how to deal with document.write? unlike innerHTML, it does not have to be well-formed.
-
+// TODO: this version is vulnerable to browser quirks.
+// in the case of docwrite, it might not even be a complete tag
 exports.checkHTMLSink = function(html, canInjectTags = true) {
   filterCode = true;
   try {
     matchSources(html, function(name, beg, end) {
       if (canInjectTags)
         script_regex.exec_loop(html, function(m) {
-          debugger;
+          console.log("script_regex", m);
         });
+      // for each tag, find the ones with an event handler
       evel_regex.exec_loop(html, function(m) {
-        debugger;
+        var attrOffset = m.index + m[1].length;
+        console.log("tag", m[0]);
+        // for each ev handler attribute, extract the js value
+        attr_regex.exec_loop(m[2], function(m) {
+          var code = m[3] || m[4] || m[5];
+          var sep = (m[3] && '"') || (m[4] && "'") || "";
+          var jsBeg = attrOffset + m.index + m[1].length + m[2].length + sep.length;
+          var jsEnd = jsBeg + code.length;
+          // now run checkJSSink on those, shifting the offsets properly
+          console.log("attr", html.substring(jsBeg, jsEnd), html.substring(beg, end));
+          var js = entities.decode(code);
+          var jsm = new Matcher(js, false);
+          if (!jsm.isWithin(Math.max(0,beg-jsBeg), Math.min(jsEnd-jsBeg,end-jsBeg)))
+            throw new Error("DOM-Based XSS Attack using " + name + " (checkHTMLSink/event): " + js.substring(beg-jsBeg, end-jsBeg));
+        });
       });
     });
   } finally {
@@ -341,7 +355,7 @@ exports.checkJsSink = function(js) {
     var m = new Matcher(js, false);
     matchSources(js, function(name, beg, end) {
       if (!m.isWithin(beg, end-beg)) // no xss when matching within strings
-        throw new Error("DOM-Based XSS Attack using " + name + " (checkJsSink): " + js.substring(beg, end+1));
+        throw new Error("DOM-Based XSS Attack using " + name + " (checkJsSink): " + js.substring(beg, end));
     });
   } finally {
     filterCode = false;
