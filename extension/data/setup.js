@@ -35,8 +35,7 @@ HTMLDocument.prototype.writeln = function _writeln(html) {
 };
 var __olddocopen = HTMLDocument.prototype.open;
 HTMLDocument.prototype.open = function _open() {
-  console.log("dopen", arguments);
-  // TODO: not sure if i need it, i could check directly in document.write
+  // console.log("dopen", arguments);
   var ret = __olddocopen.apply(dxf.unwrap(this), arguments);
   dxf.putRuntime(dxf.unwrap(this).defaultView);
   return ret;

