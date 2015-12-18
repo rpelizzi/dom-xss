@@ -18,6 +18,7 @@ var eTLDService = Cc["@mozilla.org/network/effective-tld-service;1"]
 var config = {
   rewrite: true,
   beautify: false,
+  enforce: true,
   debug: true,
   inline: false,
 };
