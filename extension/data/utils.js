@@ -244,7 +244,7 @@ exports.putRuntime = function(w) {
   }
   // recycle existing emscripten module
   w.p1FastMatch = p1FastMatch;
-  if (dxfExt.config.inline) {
+  if (dxfExt.config.minify) {
     var dxf = dxfExt.getFile("dxf.min.js");
     w.eval(dxf + mkSrcMap("dxf.min.js"));
   } else {

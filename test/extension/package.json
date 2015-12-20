@@ -1,0 +1,18 @@
+{
+  "title": "DOM-Based XSS Test Extension",
+  "name": "dxf-test",
+  "version": "0.0.1",
+  "description": "Navigates through sites and attack samples to test the filter",
+  "main": "index.js",
+  "author": "Riccardo Pelizzi",
+  "engines": {
+    "firefox": ">=38.0a1"
+  },
+  "license": "GPL-3.0",
+  "keywords": [
+    "jetpack"
+  ],
+  "dependencies": {
+    "addon-navigate": "^0.0.1"
+  }
+}
