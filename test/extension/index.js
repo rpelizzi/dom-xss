@@ -19,7 +19,7 @@ var vectorInput = [
 ];
 
 var benignInput = self.data.load("top5000.txt").split("\n").map(l => "http://www." + l.split(",")[1]);
-benignInput = benignInput.slice(0,2);
+benignInput = benignInput.slice(0,1);
 
 function processHalf(h, ignoreFirst=0) {
   if (h.processed)
@@ -47,7 +47,7 @@ var dxfHandler = {
     if (site.off)
       site.off.attack = false;
   },
-  extraGlobals: function(w, cloner) {
+  extraGlobals: function(w, cloneF) {
     w.onerror = msg => {
       if (msg.includes("DOM-Based XSS"))
         this.half.attack = true;
@@ -59,10 +59,10 @@ var dxfHandler = {
     prefs.set("security.dxf.enforce", true);
     prefs.set("security.dxf.minify", false);
   },
-  doOff: function() { 
+  turnOff: function() { 
     prefs.set("security.dxf.rewrite", false);
   },
-  doOn: function() {
+  turnOn: function() {
     prefs.set("security.dxf.rewrite", true);
   },
   end: function() {
