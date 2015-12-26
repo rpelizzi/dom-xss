@@ -1,45 +1,41 @@
-## DOM-Based XSS Filter
+## DXF: An XSS filter for DOM-Based XSS Attacks
 
-Unlike other competitors, this filter does not require browser modifications
-or offline analysis. We present a solution that can run on modern browsers
-like Firefox, Chrome and IE >= 10.
+DXF is a fast DOM-Based XSS filter that runs entirely in JavaScript using ES6
+features. Unlike other filters, it does not require modifications to the
+JavaScript engine. It also does not perform intrusive source-to-source
+transformations that increase page loading time or runtime overhead.
 
-The filter monitors all JavaScript sources (e.g. document.location) and sinks
-(e.g. document.write). Before sinks are executed, taint-inteference is used to
+DXF currently only runs in Firefox, but it uses standard ES6 features
+available in Chrome and IE >= 10.
+
+DXF monitors all JavaScript sources (e.g. `document.location`) and sinks (e.g.
+`document.write`). Before sinks are executed, taint-inteference is used to
 infer a flow between any of the sources and that particular sink. If the flow
 generates new JavaScript code, the filter prevents the sink from executing.
 Sources are monitored because, although we cannot track flows explicitly, we
-can immediately exclude any sources that have not been touched from the taint-
-inference process. In this sense, source monitoring is more of an optimization
+can immediately exclude any sources that have not been touched from the
+matching process. In this sense, source monitoring is more of an optimization
 than a requirement.
 
 Although the filter can be implemented as an HTTP proxy, we implement it here
-as a Firefox extension using the new add-on SDK.
+as a Firefox extension using the add-on SDK.
 
 # Installation and Usage
 
-First, you need to install `node`, then `jpm`, then you can do
+Install the following:
 
-    node install
+- emscripten
+- node >=5.1.1
+- babel
+- uglifyjs
 
-in the extension directory to pull the necessary dependencies. Afterwards you
-can use
-
-    jpm xpi
-
-to create an extension. For testing it is enough to do
-
-    jpm run
-
-and `jpm` will package an xpi and launch firefox with a temporary profile for
-you. If set the env variables DBG_URL and DBG_FILE, you can edit content files
-on the fly, otherwise you need to re-create the xpi to see updates.
+Then run `make xpi` and drag&drop the XPI into your FF42 installation.
 
 # Implementation
 
 The filter is made of the following components:
 
-* *Rewriter* (`extension/[matcher|rewriter].js`): implements code rewriting,
+* *Rewriter* (`extension/rewriter.js`): implements code rewriting,
 to rename all references to objects that lead to sources and sinks which
 cannot be otherwise monitored at runtime (e.g. non-configurable properties
 that cannot be wrapped, like `window`, `document`, `location`, or non-
@@ -56,17 +52,16 @@ separately to web content with a decent build system, but that's how it is now.
 any other scripts on the page. They wrap all configurable sources and sinks,
 and define proxies for the non-configurable ones, which the rewriter has
 redirected (e.g. `window` to `__window`). The purpose of this wrapping is to
-intercept sinks and check for XSS attacks. (We do not need a JaTE-like
-membrane on many objects, at least for IE EDGE, FF and Chrome. 3 proxies are
-faster, simpler and enough. Safari might require one).
+intercept sinks and check for XSS attacks.
 
 * *Taint-Inference Engine* (`p1.js / p1utils.js`): `p1.js` is an asm.js module
-based on `nlearn`, the old approximate substring matching routine used in
+based on `nlearn`, an approximate substring matching routine used in
 XSSFilt. ``p1utils.js` exports the high-level function `p1FastMatch`.
 
 ## Wrapping Sources and Sinks
 
-Here we detail the main sources and sinks and explain how we interpose on them.
+Here we detail the main sources and sinks and explain how we interpose on them
+(roughly based on the DOMXSSWiki).
 
 Sources:
 
@@ -99,7 +94,7 @@ TODO
 
 - `onmessage - event.data`: configurable on `MessageEvent.prototype`, but i am
 wondering if this is only necessary in limited cases. Same-origin messages can
-be excluded for example.
+be excluded for example. TODO
 
 
 Sinks:
@@ -116,7 +111,7 @@ use `__indirectEval`, and `__window.eval` will redirect to `__inidirectEval`.
 
 - `scriptEl.textContent`: wrappeable, configurable on `Node.prototype`.
 
-- `scriptEl.innerText`: not on FF.
+- `scriptEl.innerText`: not a sink in FF.
 
 - `location(.(href|search|hash|pathname))?`: `location` is non-configurable on
 `window` and `document`, and each one of its members are non-configurable.
@@ -144,10 +139,3 @@ itself must be initialized (e.g. `about:blank`). Wrappeable, configurable on
 
 - `window.window`: direct access to `window`. non-configurable, __window must
 intercept it.
-
-Open issue: should we check for the script text that gets inserted into nodes
-(e.g. `scriptNode.textContent`) or wait for nodes to be attached to the main
-DOM (e.g. examine subtree when doing appendChild). The main advantage of the
-former is that the text-inserting properties need to be wrapped and monitored
-anyway (the node can already be attached to the DOM, so that's your last
-chance to interpose). The latter's advantage is simply deferred enforcement.
