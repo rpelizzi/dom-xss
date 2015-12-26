@@ -3,7 +3,7 @@ var prefs = require("sdk/preferences/service");
 var {Cc, Ci, Cu} = require("chrome");
 var Request = require("sdk/request").Request;
 var notifications = require("sdk/notifications");
-
+var timers = require("sdk/timers");
 
 var {Menuitem} = require("menuitem");
 var proxy = require("addon-proxy");
@@ -85,18 +85,20 @@ addGlobals(function(w, cloner) {
 var mkExternal = (url, id, attrs="") => `<script src="${url+'?proxypass=true'}" id="${id}" ${attrs}></script>\n`;
 var mkInline = (src, id, attrs="") => `<script id="${id}" ${attrs}>\n${src}\n</script>\n`;
 
-// first, check if the local server is working, otherwise alert
-Request({
-  url: "http://localhost:8090/",
-  onComplete: function (response) {
-    if (response.status === 0) {
-      notifications.notify({
-        title: "DOM-Based XSS",
-        text: "Localhost server not working"
-      });
+// periodically check if the local server is working, otherwise alert
+timers.setInterval(function() {
+  Request({
+    url: "http://localhost:8090/",
+    onComplete: function (response) {
+      if (response.status === 0) {
+        notifications.notify({
+          title: "DOM-Based XSS",
+          text: "Localhost server not working"
+        });
+      }
     }
-  }
-}).get();
+  }).get();
+}, 15 * 1000);
 
 proxy.rewrite({
   html: function(data, req) {

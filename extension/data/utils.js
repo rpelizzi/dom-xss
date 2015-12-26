@@ -303,7 +303,11 @@ var getSources = exports.getSources = function() {
 /* Executes function f for every match on every valid source */
 var matchSources = function(s, f) {
   getSources().oForEach(function(k, p) {
-    p1FastMatch(p, s).forEach(([b, e]) => f(k, b, e));
+    p1FastMatch(p, s).forEach(function([b, e]) {
+      // remove matches that only have alphanumeric characters 
+      if (!filter_regex.test(s.substring(b,e)))
+        f(k, b, e);
+    });
   });
 };
 

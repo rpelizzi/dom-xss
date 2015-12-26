@@ -13,7 +13,7 @@ window.dxf = dxf; // allow other scripts to use utils
 var __olddocwrite = HTMLDocument.prototype.write;
 HTMLDocument.prototype.write = function _write(html) {
   dxf.markSink("document.write");
-  dxf.checkHTMLSink(html);
+  dxf.checkHTMLSink(html.toString());
   html = rewriter.html.rewriteScripts(html, function(s) {
     s = rewriter.js.rewrite(s);
     if (dxfExt.config.beautify)
@@ -45,7 +45,7 @@ HTMLDocument.prototype.open = function _open() {
 var __oldfunction = Function;
 Function = function _Function() {
   dxf.markSink("Function");
-  dxf.checkJsSink(arguments[arguments.length-1]);
+  dxf.checkJsSink(arguments[arguments.length-1].toString());
   var args = Array.prototype.slice.call(arguments);
   args = args.map((a) => rewriter.js.rewrite(a.toString()));
   console.log("func", args);
@@ -150,7 +150,7 @@ dxf.wrapGetter(MessageEvent.prototype, "data", function(orig) {
 
 dxf.wrapSetter(HTMLScriptElement.prototype, "text", function(v, orig) {
   dxf.markSink("script.text");
-  dxf.checkJsSink(v);
+  dxf.checkJsSink(v.toString());
   orig(v);
 });
 
@@ -158,20 +158,20 @@ var isJavaScriptTag = node => node.tagName === "SCRIPT" && (node.type === "" || 
 dxf.wrapSetter(Node.prototype, "textContent", function(v, orig, node) {
   if (isJavaScriptTag(node)) {
     dxf.markSink("script.textContent");
-    dxf.checkJsSink(v);
+    dxf.checkJsSink(v.toString());
   }
   orig(v);
 });
 
 dxf.wrapSetter(HTMLScriptElement.prototype, "src", function(v, orig) {
   dxf.markSink("script.src");
-  dxf.checkURLSink(v);
+  dxf.checkURLSink(v.toString());
   orig(v);
 });
 
 dxf.wrapSetter(Element.prototype, "innerHTML", function(v, orig) {
   dxf.markSink("element.innerHTML");
-  dxf.checkHTMLSink(v, false);
+  dxf.checkHTMLSink(v.toString(), false);
   orig(v);
 });
 
@@ -229,7 +229,7 @@ var __oldsetattr = Element.prototype.setAttribute;
 Element.prototype.setAttribute = function _setAttribute(name, value) {
   if (name.toLowerCase().startsWith("on")) {
     dxf.markSink("element.setAttribute");
-    dxf.checkJsSink(value);
+    dxf.checkJsSink(value.toString());
   }
   return __oldsetattr.apply(this, [name, value]);
 };
@@ -239,6 +239,7 @@ Element.prototype.setAttribute = function _setAttribute(name, value) {
 dxf.autoUnwrap(Node.prototype, "compareDocumentPosition");
 dxf.autoUnwrap(Node.prototype, "contains");
 dxf.autoUnwrap(Node.prototype, "isEqualNode");
+dxf.autoUnwrap(MutationObserver.prototype, "observe");
 
 
 
@@ -272,7 +273,7 @@ var __window = window.__window = dxf.createProxy(window, {
     location: function(v) {
       if (v.startsWith("javascript:")) {
         dxf.markSink("location");
-        dxf.checkURLSink(v, false);
+        dxf.checkURLSink(v.toString(), false);
       }
       location = v;
     }
@@ -318,7 +319,7 @@ var ___location = dxf.createProxy(location, {
     href: function(v) {
       if (v.startsWith("javascript:")) {
         dxf.markSink("location.href");
-        dxf.checkURLSink(v, false);
+        dxf.checkURLSink(v.toString(), false);
       }
       location.href = v;
     }
@@ -339,7 +340,6 @@ var __indirectEval = window.__indirectEval = function(s) {
   if (typeof s !== "string")
     return window.eval(s);
   dxf.markSink("window.eval");
-  dxf.checkJsSink(s);
   s = rewriter.js.rewrite(s);
   if (dxfExt.config.beautify)
     s = js_beautify(s);
